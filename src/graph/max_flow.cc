@@ -111,11 +111,6 @@ void SimpleMaxFlow::GetSinkSideMinCut(std::vector<NodeIndex>* result) {
   underlying_max_flow_->GetSinkSideMinCut(result);
 }
 
-FlowModel SimpleMaxFlow::CreateFlowModelOfLastSolve() {
-  if (underlying_max_flow_.get() == NULL) return FlowModel();
-  return underlying_max_flow_->CreateFlowModel();
-}
-
 template <typename Graph>
 GenericMaxFlow<Graph>::GenericMaxFlow(const Graph* graph, NodeIndex source,
                                       NodeIndex sink)
@@ -954,25 +949,6 @@ void GenericMaxFlow<Graph>::ComputeReachableNodes(
     }
   }
   *result = bfs_queue_;
-}
-
-template <typename Graph>
-FlowModel GenericMaxFlow<Graph>::CreateFlowModel() {
-  FlowModel model;
-  model.set_problem_type(FlowModel::MAX_FLOW);
-  for (int n = 0; n < graph_->num_nodes(); ++n) {
-    Node* node = model.add_node();
-    node->set_id(n);
-    if (n == source_) node->set_supply(1);
-    if (n == sink_) node->set_supply(-1);
-  }
-  for (int a = 0; a < graph_->num_arcs(); ++a) {
-    Arc* arc = model.add_arc();
-    arc->set_tail_node_id(graph_->Tail(a));
-    arc->set_head_node_id(graph_->Head(a));
-    arc->set_capacity(Capacity(a));
-  }
-  return model;
 }
 
 // Explicit instanciations that can be used by a client.

@@ -18,28 +18,27 @@
 #include <cmath>
 #include <limits>
 
-#include "base/commandlineflags.h"
 #include "base/stringprintf.h"
 #include "base/mathutil.h"
 #include "graph/graphs.h"
 #include "graph/max_flow.h"
 
-// TODO(user): Remove these flags and expose the parameters in the API.
-// New clients, please do not use these flags!
-DEFINE_int64(min_cost_flow_alpha, 5,
-             "Divide factor for epsilon at each refine step.");
-DEFINE_bool(min_cost_flow_check_feasibility, true,
-            "Check that the graph has enough capacity to send all supplies "
-            "and serve all demands. Also check that the sum of supplies "
-            "is equal to the sum of demands.");
-DEFINE_bool(min_cost_flow_check_balance, true,
-            "Check that the sum of supplies is equal to the sum of demands.");
-DEFINE_bool(min_cost_flow_check_costs, true,
-            "Check that the magnitude of the costs will not exceed the "
-            "precision of the machine when scaled (multiplied) by the number "
-            "of nodes");
-DEFINE_bool(min_cost_flow_check_result, true,
-            "Check that the result is valid.");
+
+/// Divide factor for epsilon at each refine step.
+constexpr int64_t FLAGS_min_cost_flow_alpha = 5;
+/// Check that the graph has enough capacity to send all supplies
+/// and serve all demands. Also check that the sum of supplies
+/// is equal to the sum of demands.
+constexpr bool FLAGS_min_cost_flow_check_feasibility = false;
+/// Check that the sum of supplies is equal to the sum of demands.
+constexpr bool FLAGS_min_cost_flow_check_balance = false;
+/// Check that the magnitude of the costs will not exceed the
+/// precision of the machine when scaled (multiplied) by the number
+/// of nodes
+constexpr bool FLAGS_min_cost_flow_check_costs = true;
+/// Check that the result is valid.
+constexpr bool FLAGS_min_cost_flow_check_result = false;
+
 
 namespace operations_research {
 
