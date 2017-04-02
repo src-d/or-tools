@@ -218,6 +218,9 @@ class SimpleMinCostFlow : public MinCostFlowBase {
   // valid nodes will always be [0, NumNodes()).
   SimpleMinCostFlow();
 
+  // Clears the graph and returns this instance to the clean state.
+  void Reset();
+
   // Adds a directed arc from tail to head to the underlying graph with
   // a given capacity and cost per unit of flow.
   // * Node indices and the capacity must be non-negative (>= 0).

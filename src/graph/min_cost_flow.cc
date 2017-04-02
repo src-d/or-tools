@@ -987,11 +987,23 @@ template class GenericMinCostFlow<ReverseArcStaticGraph<uint16, int32>,
                                   /*ArcFlowType=*/int16,
                                   /*ArcScaledCostType=*/int32>;
 
-SimpleMinCostFlow::SimpleMinCostFlow() {}
+SimpleMinCostFlow::SimpleMinCostFlow() : optimal_cost_(-1), maximum_flow_(-1) {}
 
 void SimpleMinCostFlow::SetNodeSupply(NodeIndex node, FlowQuantity supply) {
   ResizeNodeVectors(node);
   node_supply_[node] = supply;
+}
+
+void SimpleMinCostFlow::Reset() {
+  arc_tail_.clear();
+  arc_head_.clear();
+  arc_capacity_.clear();
+  node_supply_.clear();
+  arc_cost_.clear();
+  arc_permutation_.clear();
+  arc_flow_.clear();
+  optimal_cost_ = -1;
+  maximum_flow_ = -1;
 }
 
 ArcIndex SimpleMinCostFlow::AddArcWithCapacityAndUnitCost(NodeIndex tail,
@@ -1066,7 +1078,8 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
   }
 
   graph.Build(&arc_permutation_);
-
+  // Do not check the feasibility - it is guaranteed by our problem statement.
+  /*
   {
     GenericMaxFlow<Graph> max_flow(&graph, source, sink);
     ArcIndex arc;
@@ -1099,6 +1112,7 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
   if (adjustment == DONT_ADJUST && maximum_flow_ != total_supply) {
     return INFEASIBLE;
   }
+  */
 
   GenericMinCostFlow<Graph> min_cost_flow(&graph);
   ArcIndex arc;
@@ -1107,10 +1121,10 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
     min_cost_flow.SetArcUnitCost(permuted_arc, arc_cost_[arc]);
     min_cost_flow.SetArcCapacity(permuted_arc, arc_capacity_[arc]);
   }
-  for (NodeIndex node = 0; node < num_nodes; ++node) {
-    if (node_supply_[node] != 0) {
+  for (auto node : node_supply_) {
+    if (node != 0) {
       ArcIndex permuted_arc = PermutedArc(arc);
-      min_cost_flow.SetArcCapacity(permuted_arc, std::abs(node_supply_[node]));
+      min_cost_flow.SetArcCapacity(permuted_arc, std::abs(node));
       min_cost_flow.SetArcUnitCost(permuted_arc, 0);
       ++arc;
     }
