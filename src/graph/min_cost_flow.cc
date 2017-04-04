@@ -1078,8 +1078,6 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
   }
 
   graph.Build(&arc_permutation_);
-  // Do not check the feasibility - it is guaranteed by our problem statement.
-  /*
   {
     GenericMaxFlow<Graph> max_flow(&graph, source, sink);
     ArcIndex arc;
@@ -1112,7 +1110,6 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
   if (adjustment == DONT_ADJUST && maximum_flow_ != total_supply) {
     return INFEASIBLE;
   }
-  */
 
   GenericMinCostFlow<Graph> min_cost_flow(&graph);
   ArcIndex arc;
