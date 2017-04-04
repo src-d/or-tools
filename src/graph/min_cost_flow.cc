@@ -1044,6 +1044,8 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
     }
   }
   if (adjustment == DONT_ADJUST && total_supply != total_demand) {
+    fprintf(stderr, "or-tools: supply %lli != demand %lli\n",
+            total_supply, total_demand);
     return UNBALANCED;
   }
 
