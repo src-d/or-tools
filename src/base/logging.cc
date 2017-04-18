@@ -16,9 +16,6 @@
 
 #include "base/logging.h"
 
-DEFINE_int32(log_level, 0, "Log level (0 is the default).");
-DEFINE_bool(log_prefix, true,
-            "Prefix all log lines with the date, source file and line number.");
 
 namespace operations_research {
 DateLogger::DateLogger() {

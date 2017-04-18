@@ -136,7 +136,6 @@
 #include "graph/graph.h"
 #include "util/stats.h"
 #include "util/zvector.h"
-#include "graph/flow_problem.pb.h"
 
 namespace operations_research {
 
@@ -219,10 +218,6 @@ class SimpleMaxFlow {
   // complement set of GetNodeReachableFromSource(), then the min-cut is unique.
   // This works only if Solve() returned OPTIMAL.
   void GetSinkSideMinCut(std::vector<NodeIndex>* result);
-
-  // Creates the protocol buffer representation of the problem used by the last
-  // Solve() call. This is mainly useful for debugging.
-  FlowModel CreateFlowModelOfLastSolve();
 
  private:
   NodeIndex num_nodes_;
@@ -417,9 +412,6 @@ class GenericMaxFlow : public MaxFlowStatusClass {
   void ProcessNodeByHeight(bool value) {
     process_node_by_height_ = value && use_global_update_;
   }
-
-  // Returns the protocol buffer representation of the current problem.
-  FlowModel CreateFlowModel();
 
  protected:
   // Returns true if arc is admissible.

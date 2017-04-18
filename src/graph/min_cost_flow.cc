@@ -18,28 +18,27 @@
 #include <cmath>
 #include <limits>
 
-#include "base/commandlineflags.h"
 #include "base/stringprintf.h"
 #include "base/mathutil.h"
 #include "graph/graphs.h"
 #include "graph/max_flow.h"
 
-// TODO(user): Remove these flags and expose the parameters in the API.
-// New clients, please do not use these flags!
-DEFINE_int64(min_cost_flow_alpha, 5,
-             "Divide factor for epsilon at each refine step.");
-DEFINE_bool(min_cost_flow_check_feasibility, true,
-            "Check that the graph has enough capacity to send all supplies "
-            "and serve all demands. Also check that the sum of supplies "
-            "is equal to the sum of demands.");
-DEFINE_bool(min_cost_flow_check_balance, true,
-            "Check that the sum of supplies is equal to the sum of demands.");
-DEFINE_bool(min_cost_flow_check_costs, true,
-            "Check that the magnitude of the costs will not exceed the "
-            "precision of the machine when scaled (multiplied) by the number "
-            "of nodes");
-DEFINE_bool(min_cost_flow_check_result, true,
-            "Check that the result is valid.");
+
+/// Divide factor for epsilon at each refine step.
+constexpr int64_t FLAGS_min_cost_flow_alpha = 5;
+/// Check that the graph has enough capacity to send all supplies
+/// and serve all demands. Also check that the sum of supplies
+/// is equal to the sum of demands.
+constexpr bool FLAGS_min_cost_flow_check_feasibility = false;
+/// Check that the sum of supplies is equal to the sum of demands.
+constexpr bool FLAGS_min_cost_flow_check_balance = false;
+/// Check that the magnitude of the costs will not exceed the
+/// precision of the machine when scaled (multiplied) by the number
+/// of nodes
+constexpr bool FLAGS_min_cost_flow_check_costs = true;
+/// Check that the result is valid.
+constexpr bool FLAGS_min_cost_flow_check_result = false;
+
 
 namespace operations_research {
 
@@ -988,11 +987,23 @@ template class GenericMinCostFlow<ReverseArcStaticGraph<uint16, int32>,
                                   /*ArcFlowType=*/int16,
                                   /*ArcScaledCostType=*/int32>;
 
-SimpleMinCostFlow::SimpleMinCostFlow() {}
+SimpleMinCostFlow::SimpleMinCostFlow() : optimal_cost_(-1), maximum_flow_(-1) {}
 
 void SimpleMinCostFlow::SetNodeSupply(NodeIndex node, FlowQuantity supply) {
   ResizeNodeVectors(node);
   node_supply_[node] = supply;
+}
+
+void SimpleMinCostFlow::Reset() {
+  arc_tail_.clear();
+  arc_head_.clear();
+  arc_capacity_.clear();
+  node_supply_.clear();
+  arc_cost_.clear();
+  arc_permutation_.clear();
+  arc_flow_.clear();
+  optimal_cost_ = -1;
+  maximum_flow_ = -1;
 }
 
 ArcIndex SimpleMinCostFlow::AddArcWithCapacityAndUnitCost(NodeIndex tail,
@@ -1033,6 +1044,8 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
     }
   }
   if (adjustment == DONT_ADJUST && total_supply != total_demand) {
+    fprintf(stderr, "or-tools: supply %lli != demand %lli\n",
+            total_supply, total_demand);
     return UNBALANCED;
   }
 
@@ -1067,7 +1080,6 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
   }
 
   graph.Build(&arc_permutation_);
-
   {
     GenericMaxFlow<Graph> max_flow(&graph, source, sink);
     ArcIndex arc;
@@ -1108,10 +1120,10 @@ SimpleMinCostFlow::Status SimpleMinCostFlow::SolveWithPossibleAdjustment(
     min_cost_flow.SetArcUnitCost(permuted_arc, arc_cost_[arc]);
     min_cost_flow.SetArcCapacity(permuted_arc, arc_capacity_[arc]);
   }
-  for (NodeIndex node = 0; node < num_nodes; ++node) {
-    if (node_supply_[node] != 0) {
+  for (auto node : node_supply_) {
+    if (node != 0) {
       ArcIndex permuted_arc = PermutedArc(arc);
-      min_cost_flow.SetArcCapacity(permuted_arc, std::abs(node_supply_[node]));
+      min_cost_flow.SetArcCapacity(permuted_arc, std::abs(node));
       min_cost_flow.SetArcUnitCost(permuted_arc, 0);
       ++arc;
     }

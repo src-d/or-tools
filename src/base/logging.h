@@ -17,12 +17,11 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <iostream>  // NOLINT
-#include "base/commandlineflags.h"
 #include "base/integral_types.h"
 #include "base/macros.h"
 
-DECLARE_int32(log_level);
-DECLARE_bool(log_prefix);
+constexpr int32_t FLAGS_log_level = 0;
+constexpr bool FLAGS_log_prefix = true;
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4722)
